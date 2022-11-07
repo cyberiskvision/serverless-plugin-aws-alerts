@@ -360,8 +360,8 @@ class AlertsPlugin {
       alarm.metric,
       normalizedFunctionName
     );
-
-    return {
+      
+    let cfLogMetricTemplate = {
       [logMetricCFRefALERT]: {
         Type: 'AWS::Logs::MetricFilter',
         DependsOn: cfLogName,
@@ -376,8 +376,11 @@ class AlertsPlugin {
             },
           ],
         },
-      },
-      [logMetricCFRefOK]: {
+      }
+    }
+    
+    if (!alarm.skipOKMetric) {
+      cfLogMetricTemplate[logMetricCFRefOK] = {
         Type: 'AWS::Logs::MetricFilter',
         DependsOn: cfLogName,
         Properties: {
@@ -391,8 +394,10 @@ class AlertsPlugin {
             },
           ],
         },
-      },
-    };
+      }
+    }
+    
+    return cfLogMetricTemplate;
   }
 
   compileAlarms(config, definitions, alertTopics) {
