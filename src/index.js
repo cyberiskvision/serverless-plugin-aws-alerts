@@ -140,7 +140,7 @@ class AlertsPlugin {
 
     const stackName = this.awsProvider.naming.getStackName();
     
-    const completeFunctionName = this.providerNaming.getStackName() + functionName;
+    const completeFunctionName = this.providerNaming.getStackName() + '-' + functionName;
     const metricNamespace = definition.metricNamespace ? definition.metricNamespace : this.providerNaming.getStackName();
     const metricName = completeFunctionName + '-' + definition.name;
 
@@ -350,7 +350,7 @@ class AlertsPlugin {
   ) {
     if (!alarm.pattern) return {};
       
-    const completeFunctionName = this.providerNaming.getStackName() + functionName;
+    const completeFunctionName = this.providerNaming.getStackName() + '-' + functionName;
     //const completeFunctionNameNormalized = completeFunctionName.replace(/\-[a-z]/g, match => match.substring(1).toUpperCase()).replace(/\_[a-z]/g, match => match.substring(1).toUpperCase());
 
     const logMetricCFRefBase = this.naming.getLogMetricCloudFormationRef(
