@@ -139,6 +139,10 @@ class AlertsPlugin {
     }
 
     const stackName = this.awsProvider.naming.getStackName();
+    
+    const completeFunctionName = this.providerNaming.getStackName() + functionName;
+    const metricNamespace = definition.metricNamespace ? definition.metricNamespace : this.providerNaming.getStackName();
+    const metricName = completeFunctionName + '-' + definition.name;
 
     const namespace = definition.pattern ? stackName : definition.namespace;
 
@@ -171,8 +175,8 @@ class AlertsPlugin {
         Type: 'AWS::CloudWatch::Alarm',
         Properties: {
           ActionsEnabled: definition.actionsEnabled,
-          Namespace: namespace,
-          MetricName: metricId,
+          Namespace: metricNamespace,
+          MetricName: metricName,
           AlarmDescription: definition.description,
           Threshold: definition.threshold,
           Period: definition.period,
@@ -213,8 +217,8 @@ class AlertsPlugin {
               ReturnData: true,
               MetricStat: {
                 Metric: {
-                  Namespace: namespace,
-                  MetricName: metricId,
+                  Namespace: metricNamespace,
+                  MetricName: metricName,
                   Dimensions: dimensions,
                 },
                 Period: definition.period,
@@ -224,7 +228,7 @@ class AlertsPlugin {
             {
               Id: 'ad1',
               Expression: `ANOMALY_DETECTION_BAND(m1, ${definition.threshold})`,
-              Label: `${metricId} (expected)`,
+              Label: `${metricName} (expected)`,
               ReturnData: true,
             },
           ],
@@ -347,7 +351,7 @@ class AlertsPlugin {
     if (!alarm.pattern) return {};
       
     const completeFunctionName = this.providerNaming.getStackName() + functionName;
-    const completeFunctionNameNormalized = completeFunctionName.replace(/\-[a-z]/g, match => match.substring(1).toUpperCase()).replace(/\_[a-z]/g, match => match.substring(1).toUpperCase());
+    //const completeFunctionNameNormalized = completeFunctionName.replace(/\-[a-z]/g, match => match.substring(1).toUpperCase()).replace(/\_[a-z]/g, match => match.substring(1).toUpperCase());
 
     const logMetricCFRefBase = this.naming.getLogMetricCloudFormationRef(
       normalizedFunctionName,
@@ -359,7 +363,7 @@ class AlertsPlugin {
     const cfLogName = this.providerNaming.getLogGroupLogicalId(functionName);
     const metricNamespace = alarm.metricNamespace ? alarm.metricNamespace : this.providerNaming.getStackName();
     const logGroupName = this.providerNaming.getLogGroupName(functionObj.name);
-    const metricName = completeFunctionNameNormalized + upperFirst(alarm.name);
+    const metricName = completeFunctionName + '-' + alarm.name;
       
     let cfLogMetricTemplate = {
       [logMetricCFRefALERT]: {
