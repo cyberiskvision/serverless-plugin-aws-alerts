@@ -345,21 +345,21 @@ class AlertsPlugin {
     functionObj
   ) {
     if (!alarm.pattern) return {};
+      
+    const completeFunctionName = this.providerNaming.getStackName() + functionName;
+    const completeFunctionNameNormalized = completeFunctionName.replace(/\-[a-z]/g, match => match.substring(1).toUpperCase()).replace(/\_[a-z]/g, match => match.substring(1).toUpperCase());
 
     const logMetricCFRefBase = this.naming.getLogMetricCloudFormationRef(
       normalizedFunctionName,
       alarm.name
     );
-    const logMetricCFRefALERT = `${logMetricCFRefBase}ALERT`;
-    const logMetricCFRefOK = `${logMetricCFRefBase}OK`;
+    const logMetricCFRefALERT = `${alarm.name}Alert`;
+    const logMetricCFRefOK = `${alarm.name}Ok`;
 
     const cfLogName = this.providerNaming.getLogGroupLogicalId(functionName);
-    const metricNamespace = this.providerNaming.getStackName();
+    const metricNamespace = alarm.metricNamespace ? alarm.metricNamespace : this.providerNaming.getStackName();
     const logGroupName = this.providerNaming.getLogGroupName(functionObj.name);
-    const metricName = this.naming.getPatternMetricName(
-      alarm.metric,
-      normalizedFunctionName
-    );
+    const metricName = completeFunctionNameNormalized + upperFirst(alarm.name);
       
     let cfLogMetricTemplate = {
       [logMetricCFRefALERT]: {
